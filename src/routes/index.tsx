@@ -61,7 +61,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create short backlink URLs in one click, track clicks, and submit your link sitemap to Google Search Console for indexing.",
+          "Create short backlink URLs in one click and track clicks.",
       },
       {
         property: "og:title",
@@ -70,7 +70,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Create short backlink URLs in one click, track clicks, and submit your link sitemap to Google Search Console for indexing.",
+          "Create short backlink URLs in one click and track clicks.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
