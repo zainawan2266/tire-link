@@ -8,7 +8,7 @@
 
 export function getBrowserSiteUrl(): string {
   if (typeof window === "undefined") return "";
-  const envUrl = (import.meta.env.VITE_SITE_URL as string | undefined) ?? "";
+  const envUrl = (import.meta.env["VITE_SITE_URL"] as string | undefined) ?? "";
   if (envUrl) return envUrl.replace(/\/$/, "");
   return window.location.origin;
 }
