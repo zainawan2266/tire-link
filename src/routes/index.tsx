@@ -8,7 +8,7 @@ import {
   deleteShortLink,
   listShortLinks,
 } from "@/lib/short-links.functions";
-import { submitSitemap } from "@/lib/search-console.functions";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,8 +31,6 @@ import {
 import { toast } from "sonner";
 import {
   Link2,
-  Search,
-  Globe,
   CheckCircle,
   Copy,
   Loader2,
@@ -63,7 +61,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create short backlink URLs in one click, track clicks, and submit your link sitemap to Google Search Console for indexing.",
+          "Create short backlink URLs in one click and track clicks.",
       },
       {
         property: "og:title",
@@ -72,7 +70,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Create short backlink URLs in one click, track clicks, and submit your link sitemap to Google Search Console for indexing.",
+          "Create short backlink URLs in one click and track clicks.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -85,7 +83,6 @@ function HomePage() {
   const queryClient = useQueryClient();
   const { data: links } = useSuspenseQuery(linksQueryOptions);
   const [origin, setOrigin] = useState("");
-  const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -143,30 +140,6 @@ function HomePage() {
       toast.error("Could not delete link", {
         description: error instanceof Error ? error.message : "Please try again.",
       });
-    }
-  }
-
-  async function handleSubmitSitemap() {
-    setIsSubmittingSitemap(true);
-    try {
-      const result = await submitSitemap({
-        data: { sitemapUrl: `${origin}/sitemap.xml` },
-      });
-      if (result.status === "selection_required") {
-        toast.info("Choose a Search Console property", {
-          description: result.candidates.join(", "),
-        });
-      } else {
-        toast.success("Sitemap submitted", {
-          description: `Google accepted the sitemap for ${result.siteUrl}.`,
-        });
-      }
-    } catch (error) {
-      toast.error("Submission failed", {
-        description: error instanceof Error ? error.message : "Please try again.",
-      });
-    } finally {
-      setIsSubmittingSitemap(false);
     }
   }
 
@@ -290,33 +263,6 @@ function HomePage() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="bg-primary text-primary-foreground">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Search className="h-5 w-5" />
-                  {"\n"}
-                </CardTitle>
-                <CardDescription className="text-primary-foreground/80">
-                  {"\n"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={handleSubmitSitemap}
-                  disabled={isSubmittingSitemap}
-                >
-                  {isSubmittingSitemap ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Globe className="mr-2 h-4 w-4" />
-                  )}
-                  {""}
-                </Button>
-              </CardContent>
-            </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
