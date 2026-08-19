@@ -20,7 +20,7 @@ export const createShortLink = createServerFn({ method: "POST" })
       throw new Error("That short code is not available. Try another one.");
     }
 
-    for (let attempt = 0; attempt < 5; attempt += 1) {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
       const { data: row, error } = await supabase
         .from("short_links")
         .insert({
