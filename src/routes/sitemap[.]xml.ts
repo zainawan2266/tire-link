@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { getServerSiteUrl } from "@/lib/site-url";
 
-// TODO: replace with your project URL once a project name or custom domain is set.
-const BASE_URL = "";
+// Override with VITE_SITE_URL=https://your-domain.com for a custom domain.
 
 interface SitemapEntry {
   path: string;
@@ -20,7 +20,8 @@ interface SitemapEntry {
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }: { request: Request }) => {
+        const BASE_URL = getServerSiteUrl(request);
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
         ];
