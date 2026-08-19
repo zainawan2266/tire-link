@@ -78,17 +78,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TireLink Gen" },
+      { title: "TRG Links" },
       {
         name: "description",
         content:
-          "Generate SEO-friendly tire landing pages and submit them to Google Search Console.",
+          "Create short backlink URLs in one click and track clicks.",
       },
-      { property: "og:title", content: "TireLink Gen" },
+      { property: "og:title", content: "TRG Links" },
       {
         property: "og:description",
         content:
-          "Generate SEO-friendly tire landing pages and submit them to Google Search Console.",
+          "Create short backlink URLs in one click and track clicks.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
