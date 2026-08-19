@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      short_links: {
+        Row: {
+          campaign: string | null
+          clicks: number
+          code: string
+          created_at: string
+          destination_url: string
+          id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign?: string | null
+          clicks?: number
+          code: string
+          created_at?: string
+          destination_url: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign?: string | null
+          clicks?: number
+          code?: string
+          created_at?: string
+          destination_url?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tire_pages: {
         Row: {
           affiliate_link: string | null
@@ -73,7 +106,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_short_link_clicks: {
+        Args: { _code: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
