@@ -8,6 +8,7 @@ import {
   deleteShortLink,
   listShortLinks,
 } from "@/lib/short-links.functions";
+import { getBrowserSiteUrl } from "@/lib/site-url";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(linksQueryOptions),
   head: () => ({
     meta: [
-      { title: "LinkForge — Fast Short Links for SEO Backlinks" },
+      { title: "TRG Links — Fast Short Links for SEO Backlinks" },
       {
         name: "description",
         content:
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "LinkForge — Fast Short Links for SEO Backlinks",
+        content: "TRG Links — Fast Short Links for SEO Backlinks",
       },
       {
         property: "og:description",
@@ -82,11 +83,11 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const queryClient = useQueryClient();
   const { data: links } = useSuspenseQuery(linksQueryOptions);
-  const [origin, setOrigin] = useState("");
+  const [siteUrl, setSiteUrl] = useState("");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
+    setSiteUrl(getBrowserSiteUrl());
   }, []);
 
   const form = useForm<FormValues>({
@@ -102,7 +103,7 @@ function HomePage() {
   async function onSubmit(values: FormValues) {
     try {
       const link = await createShortLink({ data: values });
-      const shortUrl = `${origin}/${link.code}`;
+      const shortUrl = `${siteUrl}/${link.code}`;
       let copied = false;
       try {
         await navigator.clipboard.writeText(shortUrl);
@@ -125,7 +126,7 @@ function HomePage() {
   }
 
   async function handleCopy(code: string) {
-    await navigator.clipboard.writeText(`${origin}/${code}`);
+    await navigator.clipboard.writeText(`${siteUrl}/${code}`);
     setCopiedCode(code);
     toast.success("Copied to clipboard");
     setTimeout(() => setCopiedCode(null), 1500);
@@ -236,8 +237,7 @@ function HomePage() {
                           <Input placeholder="my-anchor-text" {...field} />
                         </FormControl>
                         <FormDescription>
-                          {origin || "your-site.com"}/your-code — leave empty
-                          for a random code.
+                          {`${siteUrl.replace(/^https?:\/\//, "") || "your-site.com"}/your-code`} — leave empty for a random code.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -311,8 +311,7 @@ function HomePage() {
                           rel="noreferrer"
                           className="font-semibold text-foreground hover:underline"
                         >
-                          {(origin || "").replace(/^https?:\/\//, "")}/
-                          {link.code}
+                          {`${(siteUrl || "").replace(/^https?:\/\//, "")}/${link.code}`}
                         </a>
                         {link.campaign && (
                           <Badge variant="secondary">{link.campaign}</Badge>
