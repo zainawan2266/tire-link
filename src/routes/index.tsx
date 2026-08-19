@@ -153,11 +153,11 @@ function HomePage() {
             Fast, easy, simple
           </Badge>
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            LinkForge
+            TRG Links
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Shorten any URL into a clean backlink, track its clicks, and push
-            your link sitemap to Google Search Console for indexing.
+            Shorten any URL into a clean backlink, track its clicks and push
+            your link to Google Search Console for indexing. Track Your Links Every 2 Days
           </p>
         </div>
       </section>
