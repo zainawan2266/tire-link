@@ -8,7 +8,7 @@ import {
   deleteShortLink,
   listShortLinks,
 } from "@/lib/short-links.functions";
-import { submitSitemap } from "@/lib/search-console.functions";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,8 +31,6 @@ import {
 import { toast } from "sonner";
 import {
   Link2,
-  Search,
-  Globe,
   CheckCircle,
   Copy,
   Loader2,
@@ -85,7 +83,6 @@ function HomePage() {
   const queryClient = useQueryClient();
   const { data: links } = useSuspenseQuery(linksQueryOptions);
   const [origin, setOrigin] = useState("");
-  const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -143,30 +140,6 @@ function HomePage() {
       toast.error("Could not delete link", {
         description: error instanceof Error ? error.message : "Please try again.",
       });
-    }
-  }
-
-  async function handleSubmitSitemap() {
-    setIsSubmittingSitemap(true);
-    try {
-      const result = await submitSitemap({
-        data: { sitemapUrl: `${origin}/sitemap.xml` },
-      });
-      if (result.status === "selection_required") {
-        toast.info("Choose a Search Console property", {
-          description: result.candidates.join(", "),
-        });
-      } else {
-        toast.success("Sitemap submitted", {
-          description: `Google accepted the sitemap for ${result.siteUrl}.`,
-        });
-      }
-    } catch (error) {
-      toast.error("Submission failed", {
-        description: error instanceof Error ? error.message : "Please try again.",
-      });
-    } finally {
-      setIsSubmittingSitemap(false);
     }
   }
 
