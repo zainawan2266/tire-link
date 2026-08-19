@@ -20,7 +20,7 @@ export const createShortLink = createServerFn({ method: "POST" })
       throw new Error("That short code is not available. Try another one.");
     }
 
-    for (let attempt = 0; attempt < 5; attempt += 1) {
+    for (let attempt = 0; attempt < 8; attempt += 1) {
       const { data: row, error } = await supabase
         .from("short_links")
         .insert({
@@ -37,7 +37,8 @@ export const createShortLink = createServerFn({ method: "POST" })
       if (data.customCode) {
         throw new Error("That short code is already taken.");
       }
-      code = randomCode(attempt >= 2 ? 7 : 6);
+      // grow the code length only after repeated collisions at the short length
+      code = randomCode(3 + Math.floor((attempt + 1) / 3));
     }
 
     throw new Error("Could not generate a unique short code. Please retry.");

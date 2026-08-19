@@ -1,6 +1,6 @@
 const ALPHABET = "abcdefghijkmnopqrstuvwxyz23456789";
 
-export function randomCode(length = 6) {
+export function randomCode(length = 3) {
   let out = "";
   for (let i = 0; i < length; i += 1) {
     out += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];

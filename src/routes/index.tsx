@@ -105,8 +105,18 @@ function HomePage() {
   async function onSubmit(values: FormValues) {
     try {
       const link = await createShortLink({ data: values });
-      toast.success("Short link ready", {
-        description: `${origin}/${link.code}`,
+      const shortUrl = `${origin}/${link.code}`;
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(shortUrl);
+        copied = true;
+        setCopiedCode(link.code);
+        setTimeout(() => setCopiedCode(null), 1500);
+      } catch {
+        copied = false;
+      }
+      toast.success(copied ? "Short link copied" : "Short link ready", {
+        description: shortUrl,
       });
       form.reset();
       await queryClient.invalidateQueries({ queryKey: ["short-links"] });
