@@ -8,6 +8,7 @@ import {
   deleteShortLink,
   listShortLinks,
 } from "@/lib/short-links.functions";
+import { getBrowserSiteUrl } from "@/lib/site-url";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(linksQueryOptions),
   head: () => ({
     meta: [
-      { title: "LinkForge — Fast Short Links for SEO Backlinks" },
+      { title: "TRG Links — Fast Short Links for SEO Backlinks" },
       {
         name: "description",
         content:
@@ -65,7 +66,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "LinkForge — Fast Short Links for SEO Backlinks",
+        content: "TRG Links — Fast Short Links for SEO Backlinks",
       },
       {
         property: "og:description",
