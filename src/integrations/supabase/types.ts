@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      tire_pages: {
+        Row: {
+          affiliate_link: string | null
+          brand: string
+          created_at: string | null
+          description: string | null
+          id: string
+          indexed: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          model: string
+          price: number | null
+          season: string | null
+          size: string | null
+          slug: string
+          updated_at: string | null
+          vehicle_type: string | null
+        }
+        Insert: {
+          affiliate_link?: string | null
+          brand: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          indexed?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          model: string
+          price?: number | null
+          season?: string | null
+          size?: string | null
+          slug: string
+          updated_at?: string | null
+          vehicle_type?: string | null
+        }
+        Update: {
+          affiliate_link?: string | null
+          brand?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          indexed?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          model?: string
+          price?: number | null
+          season?: string | null
+          size?: string | null
+          slug?: string
+          updated_at?: string | null
+          vehicle_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
