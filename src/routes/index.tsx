@@ -156,10 +156,8 @@ function HomePage() {
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Quick Links
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            Shorten any URL into a clean backlink, track its clicks and push
-            your link to Google Search Console for indexing.{"\u00a0"}<br />
-            Track Your Links Every 2 Days.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground whitespace-pre-wrap">
+            Shorten any URL into a clean backlink, track its clicks, and push your link to Google Search Console for indexing.{"\n\n"}
           </p>
         </div>
       </section>
