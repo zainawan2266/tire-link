@@ -353,7 +353,17 @@ function HomePage() {
         </section>
       )}
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
-        <p>Powered and secured by MZA Tech Zone</p>
+        <p>
+          Powered and Secured by the{" "}
+          <a
+            href="http://therankinggeeks.ai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline underline-offset-4 hover:text-foreground"
+          >
+            The Ranking Geeks
+          </a>
+        </p>
       </footer>
     </main>
   );
