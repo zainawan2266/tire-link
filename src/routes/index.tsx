@@ -290,33 +290,6 @@ function HomePage() {
           </Card>
 
           <div className="space-y-6">
-            <Card className="bg-primary text-primary-foreground">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Search className="h-5 w-5" />
-                  {"\n"}
-                </CardTitle>
-                <CardDescription className="text-primary-foreground/80">
-                  {"\n"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={handleSubmitSitemap}
-                  disabled={isSubmittingSitemap}
-                >
-                  {isSubmittingSitemap ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Globe className="mr-2 h-4 w-4" />
-                  )}
-                  {""}
-                </Button>
-              </CardContent>
-            </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
