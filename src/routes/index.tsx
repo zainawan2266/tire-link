@@ -294,11 +294,10 @@ function HomePage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Search className="h-5 w-5" />
-                  Index on Google
+                  {"\n"}
                 </CardTitle>
                 <CardDescription className="text-primary-foreground/80">
-                  Submit your link sitemap to Google Search Console so your
-                  backlinks get crawled.
+                  {"\n"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -313,7 +312,7 @@ function HomePage() {
                   ) : (
                     <Globe className="mr-2 h-4 w-4" />
                   )}
-                  Submit sitemap
+                  {""}
                 </Button>
               </CardContent>
             </Card>
