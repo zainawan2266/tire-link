@@ -110,7 +110,7 @@ function HomePage() {
 
   async function onSubmit(values: TireFormValues) {
     try {
-      const page = await createTirePage(values);
+      const page = await createTirePage({ data: values });
       toast.success("Tire page created", {
         description: `/${page.slug} is ready to share with Google.`,
       });
@@ -128,7 +128,7 @@ function HomePage() {
     const sitemapUrl = `${window.location.origin}/sitemap.xml`;
     setIsSubmittingSitemap(true);
     try {
-      const result = await submitSitemap({ sitemapUrl });
+      const result = await submitSitemap({ data: { sitemapUrl } });
       if (result.status === "selection_required") {
         toast.info("Choose a Search Console property", {
           description: `Multiple properties match. Please pick one: ${result.candidates.join(", ")}`,

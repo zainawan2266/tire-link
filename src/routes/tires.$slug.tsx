@@ -15,7 +15,7 @@ import { ArrowLeft, ExternalLink, Tag, Truck, Gauge } from "lucide-react";
 
 const tireQueryOptions = (slug: string) => ({
   queryKey: ["tire-page", slug],
-  queryFn: () => getTirePage({ slug }),
+  queryFn: () => getTirePage({ data: { slug } }),
 });
 
 export const Route = createFileRoute("/tires/$slug")({
