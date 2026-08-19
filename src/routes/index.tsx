@@ -312,7 +312,7 @@ function HomePage() {
                           rel="noreferrer"
                           className="font-semibold text-foreground hover:underline"
                         >
-                          {(origin || "").replace(/^https?:\/\//, "")}/
+                          {(siteUrl || "").replace(/^https?:\/\//, "")}/
                           {link.code}
                         </a>
                         {link.campaign && (
