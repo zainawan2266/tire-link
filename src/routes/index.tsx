@@ -407,6 +407,9 @@ function HomePage() {
           </div>
         </section>
       )}
+      <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
+        <p>Powered and secured by MZA Tech Zone</p>
+      </footer>
     </main>
   );
 }
