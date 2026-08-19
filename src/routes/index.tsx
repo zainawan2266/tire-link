@@ -1,14 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { createTirePage, listTirePages } from "@/lib/tire-pages.functions";
+import {
+  createShortLink,
+  deleteShortLink,
+  listShortLinks,
+} from "@/lib/short-links.functions";
 import { submitSitemap } from "@/lib/search-console.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -20,67 +22,57 @@ import { Badge } from "@/components/ui/badge";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
-  Plus,
   Link2,
   Search,
   Globe,
   CheckCircle,
-  ArrowRight,
+  Copy,
   Loader2,
+  Trash2,
+  BarChart3,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const tireFormSchema = z.object({
-  brand: z.string().min(1, "Brand is required").max(100),
-  model: z.string().min(1, "Model is required").max(100),
-  size: z.string().max(50).optional(),
-  season: z.string().max(50).optional(),
-  vehicleType: z.string().max(50).optional(),
-  description: z.string().max(2000).optional(),
-  price: z.coerce.number().nonnegative().optional(),
-  affiliateLink: z.string().url().max(1000).optional().or(z.literal("")),
+const formSchema = z.object({
+  destinationUrl: z.string().url("Enter a full URL, including https://"),
+  title: z.string().max(200).optional(),
+  campaign: z.string().max(120).optional(),
+  customCode: z.string().max(60).optional(),
 });
 
-type TireFormValues = z.infer<typeof tireFormSchema>;
+type FormValues = z.infer<typeof formSchema>;
 
-const tirePagesQueryOptions = {
-  queryKey: ["tire-pages"],
-  queryFn: () => listTirePages(),
+const linksQueryOptions = {
+  queryKey: ["short-links"],
+  queryFn: () => listShortLinks(),
 };
 
 export const Route = createFileRoute("/")({
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(tirePagesQueryOptions),
+  loader: ({ context }) => context.queryClient.ensureQueryData(linksQueryOptions),
   head: () => ({
     meta: [
-      { title: "TireLink Gen — Build Tire Landing Pages for Google" },
+      { title: "LinkForge — Fast Short Links for SEO Backlinks" },
       {
         name: "description",
         content:
-          "Generate SEO-friendly tire landing pages in seconds. Build a sitemap and submit it to Google Search Console for indexing.",
+          "Create short backlink URLs in one click, track clicks, and submit your link sitemap to Google Search Console for indexing.",
       },
       {
         property: "og:title",
-        content: "TireLink Gen — Build Tire Landing Pages for Google",
+        content: "LinkForge — Fast Short Links for SEO Backlinks",
       },
       {
         property: "og:description",
         content:
-          "Generate SEO-friendly tire landing pages in seconds. Build a sitemap and submit it to Google Search Console for indexing.",
+          "Create short backlink URLs in one click, track clicks, and submit your link sitemap to Google Search Console for indexing.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -91,91 +83,112 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const queryClient = useQueryClient();
-  const { data: tirePages } = useSuspenseQuery(tirePagesQueryOptions);
+  const { data: links } = useSuspenseQuery(linksQueryOptions);
+  const [origin, setOrigin] = useState("");
   const [isSubmittingSitemap, setIsSubmittingSitemap] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  const form = useForm<TireFormValues>({
-    resolver: zodResolver(tireFormSchema),
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      brand: "",
-      model: "",
-      size: "",
-      season: "",
-      vehicleType: "",
-      description: "",
-      price: undefined,
-      affiliateLink: "",
+      destinationUrl: "",
+      title: "",
+      campaign: "",
+      customCode: "",
     },
   });
 
-  async function onSubmit(values: TireFormValues) {
+  async function onSubmit(values: FormValues) {
     try {
-      const page = await createTirePage({ data: values });
-      toast.success("Tire page created", {
-        description: `/${page.slug} is ready to share with Google.`,
+      const link = await createShortLink({ data: values });
+      toast.success("Short link ready", {
+        description: `${origin}/${link.code}`,
       });
       form.reset();
-      await queryClient.invalidateQueries({ queryKey: ["tire-pages"] });
+      await queryClient.invalidateQueries({ queryKey: ["short-links"] });
     } catch (error) {
-      toast.error("Could not create page", {
-        description:
-          error instanceof Error ? error.message : "Please try again.",
+      toast.error("Could not create link", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    }
+  }
+
+  async function handleCopy(code: string) {
+    await navigator.clipboard.writeText(`${origin}/${code}`);
+    setCopiedCode(code);
+    toast.success("Copied to clipboard");
+    setTimeout(() => setCopiedCode(null), 1500);
+  }
+
+  async function handleDelete(code: string) {
+    try {
+      await deleteShortLink({ data: { code } });
+      await queryClient.invalidateQueries({ queryKey: ["short-links"] });
+      toast.success("Link deleted");
+    } catch (error) {
+      toast.error("Could not delete link", {
+        description: error instanceof Error ? error.message : "Please try again.",
       });
     }
   }
 
   async function handleSubmitSitemap() {
-    const sitemapUrl = `${window.location.origin}/sitemap.xml`;
     setIsSubmittingSitemap(true);
     try {
-      const result = await submitSitemap({ data: { sitemapUrl } });
+      const result = await submitSitemap({
+        data: { sitemapUrl: `${origin}/sitemap.xml` },
+      });
       if (result.status === "selection_required") {
         toast.info("Choose a Search Console property", {
-          description: `Multiple properties match. Please pick one: ${result.candidates.join(", ")}`,
+          description: result.candidates.join(", "),
         });
       } else {
         toast.success("Sitemap submitted", {
-          description: `Google Search Console accepted the sitemap for ${result.siteUrl}.`,
+          description: `Google accepted the sitemap for ${result.siteUrl}.`,
         });
       }
     } catch (error) {
       toast.error("Submission failed", {
-        description:
-          error instanceof Error ? error.message : "Please try again.",
+        description: error instanceof Error ? error.message : "Please try again.",
       });
     } finally {
       setIsSubmittingSitemap(false);
     }
   }
 
+  const totalClicks = links.reduce((sum, link) => sum + (link.clicks ?? 0), 0);
+
   return (
     <main className="min-h-screen bg-background">
-      <section className="border-b border-border bg-card px-4 py-16">
-        <div className="mx-auto max-w-4xl text-center">
+      <section className="border-b border-border bg-card px-4 py-14">
+        <div className="mx-auto max-w-3xl text-center">
           <Badge variant="secondary" className="mb-4">
             Fast, easy, simple
           </Badge>
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            TireLink Gen
+            LinkForge
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Build SEO-friendly tire landing pages in seconds, generate a
-            sitemap, and submit it straight to Google Search Console.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+            Shorten any URL into a clean backlink, track its clicks, and push
+            your link sitemap to Google Search Console for indexing.
           </p>
         </div>
       </section>
 
-      <section className="px-4 py-12">
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_360px]">
+      <section className="px-4 py-10">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1fr_340px]">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-accent-foreground" />
-                Generate a tire page
+                <Link2 className="h-5 w-5 text-accent-foreground" />
+                Create a short link
               </CardTitle>
               <CardDescription>
-                Fill in the details. We will build the page, meta tags, and
-                sitemap entry automatically.
+                Paste a destination URL. We generate the short code instantly.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -184,125 +197,15 @@ function HomePage() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-5"
                 >
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <FormField
-                      control={form.control}
-                      name="brand"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Brand</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Michelin" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="model"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Model</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Pilot Sport 4S" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid gap-5 sm:grid-cols-3">
-                    <FormField
-                      control={form.control}
-                      name="size"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Size</FormLabel>
-                          <FormControl>
-                            <Input placeholder="225/45R17" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="season"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Season</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || ""}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="All-season">
-                                All-season
-                              </SelectItem>
-                              <SelectItem value="Summer">Summer</SelectItem>
-                              <SelectItem value="Winter">Winter</SelectItem>
-                              <SelectItem value="Performance">
-                                Performance
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="vehicleType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Vehicle type</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || ""}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Passenger car">
-                                Passenger car
-                              </SelectItem>
-                              <SelectItem value="SUV / Truck">
-                                SUV / Truck
-                              </SelectItem>
-                              <SelectItem value="Motorcycle">
-                                Motorcycle
-                              </SelectItem>
-                              <SelectItem value="Commercial">
-                                Commercial
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
                   <FormField
                     control={form.control}
-                    name="description"
+                    name="destinationUrl"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>Destination URL</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="High-performance summer tire with excellent wet and dry grip..."
-                            rows={4}
+                          <Input
+                            placeholder="https://example.com/your-page"
                             {...field}
                           />
                         </FormControl>
@@ -314,18 +217,12 @@ function HomePage() {
                   <div className="grid gap-5 sm:grid-cols-2">
                     <FormField
                       control={form.control}
-                      name="price"
+                      name="title"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price (USD)</FormLabel>
+                          <FormLabel>Label (optional)</FormLabel>
                           <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="149.99"
-                              {...field}
-                              value={field.value ?? ""}
-                            />
+                            <Input placeholder="Homepage backlink" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -333,15 +230,12 @@ function HomePage() {
                     />
                     <FormField
                       control={form.control}
-                      name="affiliateLink"
+                      name="campaign"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Affiliate / buy link</FormLabel>
+                          <FormLabel>Campaign (optional)</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="https://..."
-                              {...field}
-                            />
+                            <Input placeholder="guest-posts" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -349,18 +243,36 @@ function HomePage() {
                     />
                   </div>
 
+                  <FormField
+                    control={form.control}
+                    name="customCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Custom short code (optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="my-anchor-text" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          {origin || "your-site.com"}/your-code — leave empty
+                          for a random code.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   <Button
                     type="submit"
-                    disabled={form.formState.isSubmitting}
-                    className="w-full"
                     size="lg"
+                    className="w-full"
+                    disabled={form.formState.isSubmitting}
                   >
                     {form.formState.isSubmitting ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                       <Link2 className="mr-2 h-4 w-4" />
                     )}
-                    Generate tire page
+                    Generate short link
                   </Button>
                 </form>
               </Form>
@@ -375,8 +287,8 @@ function HomePage() {
                   Index on Google
                 </CardTitle>
                 <CardDescription className="text-primary-foreground/80">
-                  Submit your sitemap to Google Search Console so every tire
-                  page can be crawled and indexed.
+                  Submit your link sitemap to Google Search Console so your
+                  backlinks get crawled.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -398,70 +310,86 @@ function HomePage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">How it works</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BarChart3 className="h-5 w-5 text-accent-foreground" />
+                  Overview
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-sm text-muted-foreground">
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-4 w-4 shrink-0 text-accent-foreground" />
-                    Fill the tire details and generate a page.
-                  </li>
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-4 w-4 shrink-0 text-accent-foreground" />
-                    Every page gets SEO meta tags and structured data.
-                  </li>
-                  <li className="flex gap-3">
-                    <CheckCircle className="h-4 w-4 shrink-0 text-accent-foreground" />
-                    Submit /sitemap.xml to Google Search Console.
-                  </li>
-                </ul>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>Short links</span>
+                  <span className="font-semibold text-foreground">
+                    {links.length}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total clicks</span>
+                  <span className="font-semibold text-foreground">
+                    {totalClicks}
+                  </span>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <CheckCircle className="h-4 w-4 shrink-0 text-accent-foreground" />
+                  Every short link redirects instantly and counts clicks.
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      {tirePages && tirePages.length > 0 && (
+      {links.length > 0 && (
         <section className="border-t border-border px-4 py-12">
           <div className="mx-auto max-w-6xl">
             <h2 className="text-2xl font-semibold text-foreground">
-              Generated tire pages
+              Your short links
             </h2>
-            <p className="mt-1 text-muted-foreground">
-              {tirePages.length} page{tirePages.length === 1 ? "" : "s"}{" "}
-              ready for Google.
-            </p>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {tirePages.map((page) => (
-                <Card key={page.id} className="flex flex-col">
-                  <CardHeader>
-                    <div className="flex flex-wrap gap-2">
-                      {page.season && (
-                        <Badge variant="secondary">{page.season}</Badge>
-                      )}
-                      {page.vehicle_type && (
-                        <Badge variant="secondary">{page.vehicle_type}</Badge>
-                      )}
+            <div className="mt-6 space-y-3">
+              {links.map((link) => (
+                <Card key={link.id}>
+                  <CardContent className="flex flex-wrap items-center gap-4 py-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <a
+                          href={`/${link.code}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-semibold text-foreground hover:underline"
+                        >
+                          {(origin || "").replace(/^https?:\/\//, "")}/
+                          {link.code}
+                        </a>
+                        {link.campaign && (
+                          <Badge variant="secondary">{link.campaign}</Badge>
+                        )}
+                      </div>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
+                        {link.title ? `${link.title} — ` : ""}
+                        {link.destination_url}
+                      </p>
                     </div>
-                    <CardTitle className="mt-2 text-lg">
-                      {page.brand} {page.model}
-                    </CardTitle>
-                    <CardDescription>
-                      {page.size && <span>{page.size}</span>}
-                      {page.price && (
-                        <span className="ml-2 font-medium text-foreground">
-                          ${Number(page.price).toFixed(2)}
-                        </span>
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="mt-auto pt-0">
-                    <Button variant="outline" size="sm" asChild className="w-full">
-                      <Link to="/tires/$slug" params={{ slug: page.slug }}>
-                        View page
-                        <ArrowRight className="ml-2 h-3 w-3" />
-                      </Link>
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{link.clicks ?? 0} clicks</Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCopy(link.code)}
+                      >
+                        {copiedCode === link.code ? (
+                          <CheckCircle className="h-3 w-3" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                        Copy
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(link.code)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

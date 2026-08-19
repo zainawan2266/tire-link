@@ -10,12 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CodeRouteImport } from './routes/$code'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as TiresSlugRouteImport } from './routes/tires.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodeRoute = CodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -23,40 +28,35 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TiresSlugRoute = TiresSlugRouteImport.update({
-  id: '/tires/$slug',
-  path: '/tires/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$code': typeof CodeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tires/$slug': typeof TiresSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$code': typeof CodeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tires/$slug': typeof TiresSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$code': typeof CodeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/tires/$slug': typeof TiresSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sitemap.xml' | '/tires/$slug'
+  fullPaths: '/' | '/$code' | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml' | '/tires/$slug'
-  id: '__root__' | '/' | '/sitemap.xml' | '/tires/$slug'
+  to: '/' | '/$code' | '/sitemap.xml'
+  id: '__root__' | '/' | '/$code' | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CodeRoute: typeof CodeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TiresSlugRoute: typeof TiresSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,6 +68,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$code': {
+      id: '/$code'
+      path: '/$code'
+      fullPath: '/$code'
+      preLoaderRoute: typeof CodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -75,20 +82,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tires/$slug': {
-      id: '/tires/$slug'
-      path: '/tires/$slug'
-      fullPath: '/tires/$slug'
-      preLoaderRoute: typeof TiresSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CodeRoute: CodeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TiresSlugRoute: TiresSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
