@@ -6,7 +6,14 @@ const BASE_URL = "";
 
 interface SitemapEntry {
   path: string;
-  changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
+  changefreq?:
+    | "always"
+    | "hourly"
+    | "daily"
+    | "weekly"
+    | "monthly"
+    | "yearly"
+    | "never";
   priority?: string;
 }
 
@@ -18,15 +25,15 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "weekly", priority: "1.0" },
         ];
 
-        const { data: tirePages, error } = await supabase
-          .from("tire_pages")
-          .select("slug, updated_at")
-          .order("updated_at", { ascending: false });
+        const { data: links, error } = await supabase
+          .from("short_links")
+          .select("code")
+          .order("created_at", { ascending: false });
 
-        if (!error && tirePages) {
-          for (const page of tirePages) {
+        if (!error && links) {
+          for (const link of links) {
             entries.push({
-              path: `/tires/${page.slug}`,
+              path: `/${link.code}`,
               changefreq: "weekly",
               priority: "0.8",
             });
