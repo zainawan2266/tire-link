@@ -311,8 +311,7 @@ function HomePage() {
                           rel="noreferrer"
                           className="font-semibold text-foreground hover:underline"
                         >
-                          {(siteUrl || "").replace(/^https?:\/\//, "")}/
-                          {link.code}
+                          {`${(siteUrl || "").replace(/^https?:\/\//, "")}/${link.code}`}
                         </a>
                         {link.campaign && (
                           <Badge variant="secondary">{link.campaign}</Badge>
