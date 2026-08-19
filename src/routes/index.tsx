@@ -237,8 +237,7 @@ function HomePage() {
                           <Input placeholder="my-anchor-text" {...field} />
                         </FormControl>
                         <FormDescription>
-                          {siteUrl.replace(/^https?:\/\//, "") || "your-site.com"}
-                          /your-code — leave empty for a random code.
+                          {`${siteUrl.replace(/^https?:\/\//, "") || "your-site.com"}/your-code`} — leave empty for a random code.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
