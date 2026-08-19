@@ -354,14 +354,14 @@ function HomePage() {
       )}
       <footer className="border-t border-border py-6 text-center text-sm text-muted-foreground">
         <p>
-          Powered and Secured by the{" "}
+          Powered and Secured by{" "}
           <a
-            href="http://therankinggeeks.ai/"
+            href="https://maps.app.goo.gl/3WzLJnmQWRcF9KUR6"
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium underline underline-offset-4 hover:text-foreground"
           >
-            The Ranking Geeks
+            MZA Tech Zone
           </a>
         </p>
       </footer>
