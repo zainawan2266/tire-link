@@ -59,7 +59,7 @@ async function resolveSiteUrl(targetUrl: string) {
       candidates: matches.map((entry) => entry.siteUrl),
     };
   }
-  return { status: "selected" as const, siteUrl: matches[0].siteUrl };
+  return { status: "selected" as const, siteUrl: matches[0]!.siteUrl };
 }
 
 const submitSitemapSchema = z.object({
