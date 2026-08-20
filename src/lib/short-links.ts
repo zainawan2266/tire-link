@@ -24,3 +24,55 @@ export const RESERVED_CODES = new Set([
   "favicon.ico",
   "lovable",
 ]);
+
+const SOCIAL_CRAWLERS = [
+  "facebookexternalhit",
+  "facebookcatalog",
+  "twitterbot",
+  "linkedinbot",
+  "slackbot",
+  "discordbot",
+  "whatsapp",
+  "telegrambot",
+  "pinterest",
+  "redditbot",
+  "skypeuripreview",
+  "embedly",
+  "quora link preview",
+  "vkshare",
+  "bitlybot",
+  "applebot",
+  "opengraph",
+  "iframely",
+  "mastodon",
+  "bluesky",
+];
+
+/** Social/link-preview crawlers should see Open Graph metadata, not a redirect. */
+export function isSocialCrawler(userAgent?: string | null) {
+  if (!userAgent) return false;
+  const ua = userAgent.toLowerCase();
+  return SOCIAL_CRAWLERS.some((bot) => ua.includes(bot));
+}
+
+/** Human-friendly preview copy for a short link. */
+export function buildLinkPreview(link: {
+  code: string;
+  title?: string | null;
+  campaign?: string | null;
+  destination_url: string;
+}) {
+  let host = link.destination_url;
+  try {
+    host = new URL(link.destination_url).hostname.replace(/^www\./, "");
+  } catch {
+    // keep the raw string when the URL cannot be parsed
+  }
+
+  const title = link.title?.trim() || `Quick Links — /${link.code}`;
+  const description = link.campaign
+    ? `${title} · ${link.campaign} campaign. Continue to ${host}.`
+    : `Short link /${link.code} pointing to ${host}. Tap to continue.`;
+
+  return { host, title, description: description.slice(0, 160) };
+}
