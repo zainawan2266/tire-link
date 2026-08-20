@@ -15,6 +15,15 @@ export const Route = createFileRoute("/$code")({
 
     return { code: params.code, link, siteUrl };
   },
+  // The response body differs per user-agent (crawler preview vs. redirect),
+  // so caches must key on it. Crawlers re-scrape often; a short shared-cache
+  // TTL keeps previews consistent without freezing edited destinations.
+  headers: ({ loaderData }) => ({
+    Vary: "User-Agent",
+    "Cache-Control": loaderData?.link
+      ? "public, max-age=0, s-maxage=300, stale-while-revalidate=86400"
+      : "public, max-age=0, s-maxage=60",
+  }),
   head: ({ params, loaderData }) => {
     const shortUrl = `${loaderData?.siteUrl ?? ""}/${params.code}`;
 
