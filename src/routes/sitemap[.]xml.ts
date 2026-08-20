@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getServerSiteUrl } from "@/lib/site-url";
 
 // Override with VITE_SITE_URL=https://your-domain.com for a custom domain.
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "weekly", priority: "1.0" },
         ];
 
-        const { data: links, error } = await supabase
+        const { data: links, error } = await supabaseAdmin
           .from("short_links")
           .select("code")
           .order("created_at", { ascending: false });
