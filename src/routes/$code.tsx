@@ -77,7 +77,7 @@ export const Route = createFileRoute("/$code")({
       ],
     };
   },
-  component: CodePage;
+  component: CodePage,
 });
 
 function CodePage() {
