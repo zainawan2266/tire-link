@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
 import { normalizeCode, randomCode, RESERVED_CODES } from "./short-links";
 
 const createSchema = z.object({
@@ -15,13 +14,17 @@ const codeSchema = z.object({ code: z.string().min(1).max(60) });
 export const createShortLink = createServerFn({ method: "POST" })
   .inputValidator((data) => createSchema.parse(data))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
     let code = data.customCode ? normalizeCode(data.customCode) : randomCode();
     if (!code || RESERVED_CODES.has(code)) {
       throw new Error("That short code is not available. Try another one.");
     }
 
     for (let attempt = 0; attempt < 8; attempt += 1) {
-      const { data: row, error } = await supabase
+      const { data: row, error } = await supabaseAdmin
         .from("short_links")
         .insert({
           code,
@@ -46,7 +49,10 @@ export const createShortLink = createServerFn({ method: "POST" })
 
 export const listShortLinks = createServerFn({ method: "GET" }).handler(
   async () => {
-    const { data, error } = await supabase
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { data, error } = await supabaseAdmin
       .from("short_links")
       .select("*")
       .order("created_at", { ascending: false })
@@ -60,7 +66,10 @@ export const listShortLinks = createServerFn({ method: "GET" }).handler(
 export const resolveShortLink = createServerFn({ method: "GET" })
   .inputValidator((data) => codeSchema.parse(data))
   .handler(async ({ data }) => {
-    const { data: row, error } = await supabase
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { data: row, error } = await supabaseAdmin
       .from("short_links")
       .select("code, destination_url, title")
       .eq("code", data.code)
@@ -69,7 +78,9 @@ export const resolveShortLink = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!row) return null;
 
-    await supabase.rpc("increment_short_link_clicks", { _code: data.code });
+    await supabaseAdmin.rpc("increment_short_link_clicks", {
+      _code: data.code,
+    });
 
     return row;
   });
@@ -77,7 +88,10 @@ export const resolveShortLink = createServerFn({ method: "GET" })
 export const deleteShortLink = createServerFn({ method: "POST" })
   .inputValidator((data) => codeSchema.parse(data))
   .handler(async ({ data }) => {
-    const { error } = await supabase
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { error } = await supabaseAdmin
       .from("short_links")
       .delete()
       .eq("code", data.code);
