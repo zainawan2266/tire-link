@@ -272,13 +272,19 @@ function HomePage() {
               <CardContent className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex justify-between">
                   <span>Short links</span>
-                  <span className="font-semibold text-foreground">
+                  <span
+                    className="font-semibold text-foreground"
+                    suppressHydrationWarning
+                  >
                     {links.length}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total clicks</span>
-                  <span className="font-semibold text-foreground">
+                  <span
+                    className="font-semibold text-foreground"
+                    suppressHydrationWarning
+                  >
                     {totalClicks}
                   </span>
                 </div>
