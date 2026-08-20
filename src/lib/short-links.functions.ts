@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { normalizeCode, randomCode, RESERVED_CODES } from "./short-links";
+import { normalizeCode, randomCode, RESERVED_CODES, isSocialCrawler } from "./short-links";
+import { getServerSiteUrl } from "./site-url";
 
 const createSchema = z.object({
   destinationUrl: z.string().url().max(2000),
@@ -69,20 +70,29 @@ export const resolveShortLink = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
+    const { getRequest } = await import("@tanstack/react-start/server");
+
+    const request = getRequest();
+    const siteUrl = getServerSiteUrl(request);
+    const isCrawler = isSocialCrawler(request?.headers.get("user-agent"));
+
     const { data: row, error } = await supabaseAdmin
       .from("short_links")
-      .select("code, destination_url, title")
+      .select("code, destination_url, title, campaign")
       .eq("code", data.code)
       .maybeSingle();
 
     if (error) throw new Error(error.message);
-    if (!row) return null;
+    if (!row) return { link: null, isCrawler, siteUrl };
 
-    await supabaseAdmin.rpc("increment_short_link_clicks", {
-      _code: data.code,
-    });
+    // Social crawlers only fetch the preview; they are not real visitors.
+    if (!isCrawler) {
+      await supabaseAdmin.rpc("increment_short_link_clicks", {
+        _code: data.code,
+      });
+    }
 
-    return row;
+    return { link: row, isCrawler, siteUrl };
   });
 
 export const deleteShortLink = createServerFn({ method: "POST" })
