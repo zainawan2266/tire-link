@@ -48,7 +48,7 @@ A fast, simple short-link generator built for SEO backlink tracking. Create clea
    - `VITE_SUPABASE_PUBLISHABLE_KEY`
    - `VITE_SUPABASE_PROJECT_ID`
    - `VITE_SITE_URL` (set to your custom domain, e.g. `https://example.com`)
-4. Deploy. Vercel will use the `vercel` Nitro preset automatically.
+4. Deploy. For Vercel, set the Nitro preset via a `NITRO_PRESET=vercel` environment variable (the repo builds for the Lovable/Cloudflare target by default).
 
 ## Connect a custom domain
 
