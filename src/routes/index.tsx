@@ -58,7 +58,7 @@ export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(linksQueryOptions),
   head: () => ({
     meta: [
-      { title: "TRG Links — Fast Short Links for SEO Backlinks" },
+      { title: "Quick Links — Fast Short Links for SEO Backlinks" },
       {
         name: "description",
         content:
@@ -66,7 +66,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "TRG Links — Fast Short Links for SEO Backlinks",
+        content: "Quick Links — Fast Short Links for SEO Backlinks",
       },
       {
         property: "og:description",

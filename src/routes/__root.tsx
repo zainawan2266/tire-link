@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TRG Links" },
+      { title: "Quick Links" },
       {
         name: "description",
         content:
           "Create short backlink URLs in one click and track clicks.",
       },
-      { property: "og:title", content: "TRG Links" },
+      { property: "og:title", content: "Quick Links" },
       {
         property: "og:description",
         content:
