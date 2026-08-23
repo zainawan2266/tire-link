@@ -76,3 +76,39 @@ export function buildLinkPreview(link: {
 
   return { host, title, description: description.slice(0, 160) };
 }
+
+/** Only http(s) destinations are allowed — blocks javascript:, data:, etc. */
+export function isSafeDestination(url: string) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function hostOf(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+/** Metadata for the public landing page of a short link. */
+export function buildLandingMeta(link: {
+  code: string;
+  title?: string | null;
+  description?: string | null;
+  category?: string | null;
+  campaign?: string | null;
+  destination_url: string;
+}) {
+  const host = hostOf(link.destination_url);
+  const title = `${link.title?.trim() || `Link to ${host}`} | Quick Links`;
+  const description = (
+    link.description?.trim() ||
+    `${link.title?.trim() || `A shared resource on ${host}`} — an external resource hosted at ${host}. Read the details and visit the original page.`
+  ).slice(0, 158);
+  return { host, title, description };
+}
