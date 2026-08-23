@@ -17,31 +17,40 @@ export type Database = {
       short_links: {
         Row: {
           campaign: string | null
+          category: string | null
           clicks: number
           code: string
           created_at: string
+          description: string | null
           destination_url: string
           id: string
+          is_public: boolean
           title: string | null
           updated_at: string
         }
         Insert: {
           campaign?: string | null
+          category?: string | null
           clicks?: number
           code: string
           created_at?: string
+          description?: string | null
           destination_url: string
           id?: string
+          is_public?: boolean
           title?: string | null
           updated_at?: string
         }
         Update: {
           campaign?: string | null
+          category?: string | null
           clicks?: number
           code?: string
           created_at?: string
+          description?: string | null
           destination_url?: string
           id?: string
+          is_public?: boolean
           title?: string | null
           updated_at?: string
         }
