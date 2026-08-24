@@ -41,8 +41,16 @@ import {
 import { useEffect, useState } from "react";
 
 const formSchema = z.object({
-  destinationUrl: z.string().url("Enter a full URL, including https://"),
+  destinationUrl: z
+    .string()
+    .url("Enter a full URL, including https://")
+    .refine(
+      (value) => /^https?:\/\//i.test(value),
+      "Only http:// and https:// links are allowed",
+    ),
   title: z.string().max(200).optional(),
+  description: z.string().max(600).optional(),
+  category: z.string().max(80).optional(),
   campaign: z.string().max(120).optional(),
   customCode: z.string().max(60).optional(),
 });
@@ -95,6 +103,8 @@ function HomePage() {
     defaultValues: {
       destinationUrl: "",
       title: "",
+      description: "",
+      category: "",
       campaign: "",
       customCode: "",
     },
@@ -226,6 +236,42 @@ function HomePage() {
                     />
                   </div>
 
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category (optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Tires" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description (optional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="What visitors will find on the page"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Shown on the public landing page and in search
+                            results.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
                     name="customCode"
@@ -288,9 +334,14 @@ function HomePage() {
                     {totalClicks}
                   </span>
                 </div>
+                    <div className="pt-2 text-sm">
+                  <a href="/links" className="text-foreground hover:underline">
+                    View the public link directory
+                  </a>
+                </div>
                 <div className="flex gap-2 pt-2">
                   <CheckCircle className="h-4 w-4 shrink-0 text-accent-foreground" />
-                  Every short link redirects instantly and counts clicks.
+                  Every short link gets a crawlable landing page and counts real visits.
                 </div>
               </CardContent>
             </Card>
