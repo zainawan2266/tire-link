@@ -5,14 +5,15 @@ import { hostOf } from "@/lib/short-links";
 import { getServerSiteUrl } from "@/lib/site-url";
 
 const searchSchema = z.object({
-  page: z.coerce.number().int().min(1).max(500).catch(1),
+  // Optional so /links itself is never rewritten to /links?page=1.
+  page: z.coerce.number().int().min(1).max(500).optional().catch(undefined),
 });
 
 const SITE_URL = "https://tire-link.lovable.app";
 
 export const Route = createFileRoute("/links")({
   validateSearch: searchSchema,
-  loaderDeps: ({ search }) => ({ page: search.page }),
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   loader: ({ deps }) => listPublicShortLinks({ data: { page: deps.page } }),
   head: ({ loaderData }) => {
     const page = loaderData?.page ?? 1;
