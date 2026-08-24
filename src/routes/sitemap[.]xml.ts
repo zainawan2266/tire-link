@@ -23,20 +23,32 @@ export const Route = createFileRoute("/sitemap.xml")({
         const BASE_URL = getServerSiteUrl(request);
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
+          { path: "/links", changefreq: "daily", priority: "0.9" },
         ];
 
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"
         );
+        // Only existing, public landing pages — each returns HTTP 200.
         const { data: links, error } = await supabaseAdmin
           .from("short_links")
           .select("code")
+          .eq("is_public", true)
           .order("created_at", { ascending: false });
 
         if (!error && links) {
+          const perPage = 50;
+          const pages = Math.ceil(links.length / perPage);
+          for (let page = 2; page <= pages; page += 1) {
+            entries.push({
+              path: `/links?page=${page}`,
+              changefreq: "weekly",
+              priority: "0.5",
+            });
+          }
           for (const link of links) {
             entries.push({
-              path: `/${link.code}`,
+              path: `/${link.code.toLowerCase()}`,
               changefreq: "weekly",
               priority: "0.8",
             });
