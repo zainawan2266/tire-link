@@ -95,20 +95,55 @@ export function hostOf(url: string) {
   }
 }
 
-/** Metadata for the public landing page of a short link. */
-export function buildLandingMeta(link: {
+export const SITE_NAME = "Quick Links";
+
+export interface LandingLink {
   code: string;
   title?: string | null;
   description?: string | null;
   category?: string | null;
   campaign?: string | null;
   destination_url: string;
-}) {
-  const host = hostOf(link.destination_url);
-  const title = `${link.title?.trim() || `Link to ${host}`} | Quick Links`;
-  const description = (
-    link.description?.trim() ||
-    `${link.title?.trim() || `A shared resource on ${host}`} — an external resource hosted at ${host}. Read the details and visit the original page.`
-  ).slice(0, 158);
-  return { host, title, description };
+  domain?: string | null;
+  og_title?: string | null;
+  og_description?: string | null;
+  og_image?: string | null;
+  favicon?: string | null;
+  h1?: string | null;
+  content_summary?: string | null;
+  canonical_url?: string | null;
+  indexable?: boolean | null;
 }
+
+/** Truncates on a word boundary so titles never end mid-word. */
+export function truncate(text: string, max: number) {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+/** Metadata for the public landing page of a short link. */
+export function buildLandingMeta(link: LandingLink) {
+  const host = link.domain?.trim() || hostOf(link.destination_url);
+
+  // Prefer real destination metadata, fall back to user input, then the domain.
+  const rawTitle =
+    link.og_title?.trim() ||
+    link.title?.trim() ||
+    link.h1?.trim() ||
+    `Link to ${host}`;
+  const heading = truncate(rawTitle, 70);
+  const title = `${truncate(rawTitle, 70 - SITE_NAME.length - 3)} | ${SITE_NAME}`;
+
+  const rawDescription =
+    link.description?.trim() ||
+    link.og_description?.trim() ||
+    link.content_summary?.trim() ||
+    `${rawTitle} — a page hosted on ${host}. Preview the details here before continuing to the original website.`;
+  const description = truncate(rawDescription, 158);
+
+  return { host, title, heading, description };
+}
+

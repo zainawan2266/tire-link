@@ -17,40 +17,76 @@ export type Database = {
       short_links: {
         Row: {
           campaign: string | null
+          canonical_url: string | null
           category: string | null
           clicks: number
           code: string
+          content_summary: string | null
           created_at: string
           description: string | null
           destination_url: string
+          domain: string | null
+          favicon: string | null
+          fetch_status: string | null
+          h1: string | null
+          http_status: number | null
           id: string
+          indexable: boolean
           is_public: boolean
+          last_fetched_at: string | null
+          og_description: string | null
+          og_image: string | null
+          og_title: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
           campaign?: string | null
+          canonical_url?: string | null
           category?: string | null
           clicks?: number
           code: string
+          content_summary?: string | null
           created_at?: string
           description?: string | null
           destination_url: string
+          domain?: string | null
+          favicon?: string | null
+          fetch_status?: string | null
+          h1?: string | null
+          http_status?: number | null
           id?: string
+          indexable?: boolean
           is_public?: boolean
+          last_fetched_at?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
           campaign?: string | null
+          canonical_url?: string | null
           category?: string | null
           clicks?: number
           code?: string
+          content_summary?: string | null
           created_at?: string
           description?: string | null
           destination_url?: string
+          domain?: string | null
+          favicon?: string | null
+          fetch_status?: string | null
+          h1?: string | null
+          http_status?: number | null
           id?: string
+          indexable?: boolean
           is_public?: boolean
+          last_fetched_at?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
           title?: string | null
           updated_at?: string
         }

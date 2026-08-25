@@ -32,25 +32,32 @@ export const createShortLink = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import(
       "@/integrations/supabase/client.server"
     );
+    const { fetchLinkPreview } = await import("./link-preview.server");
 
     let code = data.customCode ? normalizeCode(data.customCode) : randomCode();
     if (!code || RESERVED_CODES.has(code)) {
       throw new Error("That short code is not available. Try another one.");
     }
 
+    // Metadata fetching must never block link creation from succeeding.
+    const preview = await fetchLinkPreview(data.destinationUrl);
+
     for (let attempt = 0; attempt < 8; attempt += 1) {
       const { data: row, error } = await supabaseAdmin
         .from("short_links")
         .insert({
+          ...preview,
           code,
           destination_url: data.destinationUrl,
-          title: data.title || null,
-          description: data.description || null,
+          // User-supplied copy always wins over the fetched page metadata.
+          title: data.title || preview.title,
+          description: data.description || preview.description,
           category: data.category || null,
           campaign: data.campaign || null,
         })
         .select()
         .single();
+
 
       if (!error) return row;
       if (error.code !== "23505") throw new Error(error.message);
@@ -63,6 +70,61 @@ export const createShortLink = createServerFn({ method: "POST" })
 
     throw new Error("Could not generate a unique short code. Please retry.");
   });
+
+/** Re-fetches destination metadata for one short link (owner/admin action). */
+export const refreshShortLinkMetadata = createServerFn({ method: "POST" })
+  .inputValidator((data) => codeSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { fetchLinkPreview } = await import("./link-preview.server");
+
+    const { data: row, error } = await supabaseAdmin
+      .from("short_links")
+      .select("code, destination_url, title, description")
+      .eq("code", data.code)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Short link not found.");
+
+    const preview = await fetchLinkPreview(row.destination_url);
+    const { data: updated, error: updateError } = await supabaseAdmin
+      .from("short_links")
+      .update({
+        ...preview,
+        // Existing hand-written copy is preserved across refreshes.
+        title: row.title || preview.title,
+        description: row.description || preview.description,
+      })
+      .eq("code", row.code)
+      .select()
+      .single();
+    if (updateError) throw new Error(updateError.message);
+    return updated;
+  });
+
+
+const indexableSchema = z.object({
+  code: z.string().min(1).max(60),
+  indexable: z.boolean(),
+});
+
+/** Controls whether a landing page is index,follow or noindex,nofollow. */
+export const setShortLinkIndexable = createServerFn({ method: "POST" })
+  .inputValidator((data) => indexableSchema.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+    const { error } = await supabaseAdmin
+      .from("short_links")
+      .update({ indexable: data.indexable })
+      .eq("code", data.code);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 export const listShortLinks = createServerFn({ method: "GET" }).handler(
   async () => {
