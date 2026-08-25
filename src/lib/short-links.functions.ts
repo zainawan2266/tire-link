@@ -82,7 +82,7 @@ export const refreshShortLinkMetadata = createServerFn({ method: "POST" })
 
     const { data: row, error } = await supabaseAdmin
       .from("short_links")
-      .select("code, destination_url")
+      .select("code, destination_url, title, description")
       .eq("code", data.code)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -91,13 +91,19 @@ export const refreshShortLinkMetadata = createServerFn({ method: "POST" })
     const preview = await fetchLinkPreview(row.destination_url);
     const { data: updated, error: updateError } = await supabaseAdmin
       .from("short_links")
-      .update(preview)
+      .update({
+        ...preview,
+        // Existing hand-written copy is preserved across refreshes.
+        title: row.title || preview.title,
+        description: row.description || preview.description,
+      })
       .eq("code", row.code)
       .select()
       .single();
     if (updateError) throw new Error(updateError.message);
     return updated;
   });
+
 
 const indexableSchema = z.object({
   code: z.string().min(1).max(60),
