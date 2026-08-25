@@ -46,16 +46,18 @@ export const createShortLink = createServerFn({ method: "POST" })
       const { data: row, error } = await supabaseAdmin
         .from("short_links")
         .insert({
+          ...preview,
           code,
           destination_url: data.destinationUrl,
-          title: data.title || null,
-          description: data.description || null,
+          // User-supplied copy always wins over the fetched page metadata.
+          title: data.title || preview.title,
+          description: data.description || preview.description,
           category: data.category || null,
           campaign: data.campaign || null,
-          ...preview,
         })
         .select()
         .single();
+
 
       if (!error) return row;
       if (error.code !== "23505") throw new Error(error.message);
