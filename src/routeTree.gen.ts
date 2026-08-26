@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CodeRouteImport } from './routes/$code'
 import { Route as LinksRouteImport } from './routes/links'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SCodeRouteImport } from './routes/s.$code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SCodeRoute = SCodeRouteImport.update({
+  id: '/s/$code',
+  path: '/s/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$code': typeof CodeRoute
   '/links': typeof LinksRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/s/$code': typeof SCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$code': typeof CodeRoute
   '/links': typeof LinksRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/s/$code': typeof SCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/$code': typeof CodeRoute
   '/links': typeof LinksRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/s/$code': typeof SCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/$code' | '/links' | '/sitemap.xml'
+  fullPaths: '/' | '/$code' | '/links' | '/sitemap.xml' | '/s/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$code' | '/links' | '/sitemap.xml'
-  id: '__root__' | '/' | '/$code' | '/links' | '/sitemap.xml'
+  to: '/' | '/$code' | '/links' | '/sitemap.xml' | '/s/$code'
+  id: '__root__' | '/' | '/$code' | '/links' | '/sitemap.xml' | '/s/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   CodeRoute: typeof CodeRoute
   LinksRoute: typeof LinksRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SCodeRoute: typeof SCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/s/$code': {
+      id: '/s/$code'
+      path: '/s/$code'
+      fullPath: '/s/$code'
+      preLoaderRoute: typeof SCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   CodeRoute: CodeRoute,
   LinksRoute: LinksRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SCodeRoute: SCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
