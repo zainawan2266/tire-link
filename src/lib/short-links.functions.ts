@@ -156,12 +156,15 @@ export const listPublicShortLinks = createServerFn({ method: "GET" })
 
     const { data: rows, error, count } = await supabaseAdmin
       .from("short_links")
-      .select("code, title, description, category, destination_url, created_at", {
-        count: "exact",
-      })
+      .select(
+        "code, title, description, category, destination_url, domain, og_title, og_description, og_image, favicon, h1, content_summary, created_at",
+        { count: "exact" },
+      )
       .eq("is_public", true)
+      .eq("indexable", true)
       .order("created_at", { ascending: false })
       .range(from, from + perPage - 1);
+
 
     if (error) throw new Error(error.message);
     return {
