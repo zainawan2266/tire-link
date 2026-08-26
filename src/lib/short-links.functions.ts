@@ -191,10 +191,11 @@ export const resolveShortLink = createServerFn({ method: "GET" })
     const { data: row, error } = await supabaseAdmin
       .from("short_links")
       .select(
-        "code, destination_url, title, description, category, campaign, clicks, created_at, is_public",
+        "code, destination_url, title, description, category, campaign, clicks, created_at, is_public, indexable, domain, og_title, og_description, og_image, favicon, h1, content_summary, canonical_url, http_status, fetch_status, last_fetched_at",
       )
       .eq("code", data.code)
       .maybeSingle();
+
 
     if (error) throw new Error(error.message);
     // Clicks are only recorded when a visitor presses "Visit website".
